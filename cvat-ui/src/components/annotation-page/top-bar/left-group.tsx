@@ -1,11 +1,8 @@
-// Copyright (C) 2020-2022 Intel Corporation
-// Copyright (C) CVAT.ai Corporation
-//
-// SPDX-License-Identifier: MIT
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Col } from 'antd/lib/grid';
-import Icon, { StopOutlined, CheckCircleOutlined, LoadingOutlined } from '@ant-design/icons';
+import Icon, {
+    StopOutlined, CheckCircleOutlined, LoadingOutlined, SaveOutlined,
+} from '@ant-design/icons';
 import Modal from 'antd/lib/modal';
 import Button from 'antd/lib/button';
 import Text from 'antd/lib/typography/Text';
@@ -35,6 +32,7 @@ interface Props {
     onRedoClick(): void;
     onFinishDraw(): void;
     onSwitchToolsBlockerState(): void;
+    onSaveForSamurai(): void; // Function to save first-frame annotations differently
 }
 
 const componentShortcuts = {
@@ -76,7 +74,31 @@ function LeftGroup(props: Props): JSX.Element {
         onRedoClick,
         onFinishDraw,
         onSwitchToolsBlockerState,
+        onSaveForSamurai,
     } = props;
+
+    const [frame, setFrame] = useState<number>(0); // Store the current frame number
+
+    // Function to get the current frame from the UI
+    const updateFrameNumber = () => {
+        const frameInput = document.querySelector('.cvat-player-frame-selector [role="spinbutton"]');
+        if (frameInput) {
+            const frameValue = frameInput.getAttribute('aria-valuenow');
+            if (frameValue) {
+                setFrame(Number(frameValue));
+            }
+        }
+    };
+
+    useEffect(() => {
+        updateFrameNumber(); // Run frame update when the component mounts
+        const observer = new MutationObserver(updateFrameNumber);
+        const target = document.querySelector('.cvat-player-frame-selector');
+        if (target) {
+            observer.observe(target, { attributes: true, subtree: true });
+        }
+        return () => observer.disconnect();
+    }, []);
 
     const includesDoneButton = [
         ActiveControl.DRAW_POLYGON,
@@ -111,7 +133,7 @@ function LeftGroup(props: Props): JSX.Element {
     return (
         <>
             <GlobalHotKeys keyMap={subKeyMap(componentShortcuts, keyMap)} handlers={handlers} />
-            { saving && (
+            {saving && (
                 <Modal
                     open
                     destroyOnClose
@@ -125,7 +147,25 @@ function LeftGroup(props: Props): JSX.Element {
             )}
             <Col className='cvat-annotation-header-left-group'>
                 <AnnotationMenuComponent />
+
+                {/* Save for Samurai Button (Only Active on Frame 0) */}
+                <CVATTooltip overlay='Save annotations for Samurai (only on first frame)'>
+                    <Button
+                        type='link'
+                        className='cvat-annotation-header-save-samurai-button cvat-annotation-header-button'
+                        onClick={onSaveForSamurai}
+                        disabled={frame !== 0} // Disable button if not on the first frame
+                        style={{ opacity: frame === 0 ? 1 : 0.5 }} // Dim the button if inactive
+                    >
+                        <SaveOutlined />
+                        Samurai
+                    </Button>
+                </CVATTooltip>
+
+                {/* Standard Save Button */}
                 <SaveAnnotationsButton />
+
+                {/* Undo Button */}
                 <CVATTooltip overlay={`Undo: ${undoAction} ${undoShortcut}`}>
                     <Button
                         style={{ pointerEvents: undoAction ? 'initial' : 'none', opacity: undoAction ? 1 : 0.5 }}
@@ -137,6 +177,8 @@ function LeftGroup(props: Props): JSX.Element {
                         <span>Undo</span>
                     </Button>
                 </CVATTooltip>
+
+                {/* Redo Button */}
                 <CVATTooltip overlay={`Redo: ${redoAction} ${redoShortcut}`}>
                     <Button
                         style={{ pointerEvents: redoAction ? 'initial' : 'none', opacity: redoAction ? 1 : 0.5 }}
@@ -148,6 +190,8 @@ function LeftGroup(props: Props): JSX.Element {
                         Redo
                     </Button>
                 </CVATTooltip>
+
+                {/* Done Button */}
                 {includesDoneButton ? (
                     <CVATTooltip overlay={`Press "${drawShortcut}" to finish`}>
                         <Button type='link' className='cvat-annotation-header-done-button cvat-annotation-header-button' onClick={onFinishDraw}>
@@ -156,6 +200,8 @@ function LeftGroup(props: Props): JSX.Element {
                         </Button>
                     </CVATTooltip>
                 ) : null}
+
+                {/* Block AI Tools Button */}
                 {includesToolsBlockerButton ? (
                     <CVATTooltip overlay={`Press "${switchToolsBlockerShortcut}" to postpone running the algorithm `}>
                         <Button

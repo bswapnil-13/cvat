@@ -41,6 +41,14 @@ export function labelShapeType(label?: Label): ShapeType | null {
     return ShapeType.RECTANGLE;
 }
 
+// export enum AnnotationActionTypes {
+//     SAVE_JOB_ANNOTATIONS = 'SAVE_JOB_ANNOTATIONS',
+//     SAVE_JOB_ANNOTATIONS_SUCCESS = 'SAVE_JOB_ANNOTATIONS_SUCCESS',
+//     SAVE_JOB_ANNOTATIONS_FAILED = 'SAVE_JOB_ANNOTATIONS_FAILED',
+//     SAVE_FIRST_FRAME_ANNOTATIONS = 'SAVE_FIRST_FRAME_ANNOTATIONS', // New action type
+//     SAVE_FIRST_FRAME_ANNOTATIONS_SUCCESS = 'SAVE_FIRST_FRAME_ANNOTATIONS_SUCCESS',
+//     SAVE_FIRST_FRAME_ANNOTATIONS_FAILED = 'SAVE_FIRST_FRAME_ANNOTATIONS_FAILED',
+// }
 const defaultState: AnnotationState = {
     activities: {
         loads: {},

@@ -1665,3 +1665,31 @@ export function updateEditedStateAsync(objectState: ObjectState | null): ThunkAc
         }
     };
 }
+
+// export function saveFirstFrameAnnotationsAsync(jobInstance: any) {
+//     return async (dispatch: any) => {
+//         try {
+//             dispatch({
+//                 type: AnnotationActionTypes.SAVE_FIRST_FRAME_ANNOTATIONS,
+//                 payload: { jobInstance },
+//             });
+
+//             // Get only annotations for frame 0
+//             const firstFrameAnnotations = jobInstance.annotations.filter((shape: any) => shape.frame === 0);
+
+//             if (firstFrameAnnotations.length > 0) {
+//                 await jobInstance.annotations.save({ shapes: firstFrameAnnotations }); // Save only frame 0
+//             }
+
+//             dispatch({
+//                 type: AnnotationActionTypes.SAVE_FIRST_FRAME_ANNOTATIONS_SUCCESS,
+//                 payload: { jobInstance },
+//             });
+//         } catch (error) {
+//             dispatch({
+//                 type: AnnotationActionTypes.SAVE_FIRST_FRAME_ANNOTATIONS_FAILED,
+//                 payload: { error },
+//             });
+//         }
+//     };
+// }
